@@ -52,10 +52,14 @@ void loop() {
 //MOVE TO ORIGIN------------------------------------------------
 void findOrigin(){
 
+    right_cl = digitalRead(RIGHT);
+    top_cl = digitalRead(TOP);
+    
     if(right_cl == LOW && top_cl == LOW){
       moveRight();
+      right_cl = digitalRead(RIGHT);
     }
-    right_cl = digitalRead(RIGHT);
+    
     if(right_cl == HIGH && top_cl == LOW){
       Step_OFF();
       delay(delay_time);
@@ -63,17 +67,20 @@ void findOrigin(){
         moveLeft();
       }
     }
+    
     if(right_cl == LOW && top_cl == LOW){
 
       moveUp();
       top_cl = digitalRead(TOP);
-      if(top_cl == HIGH){
+
+    }
+
+    if(right_cl == LOW && top_cl == HIGH){
         Step_OFF();
         for(int i=0; i < 20; i++){
           moveDown();
         }
         origin = 1;
-      }
     }
 }
 
