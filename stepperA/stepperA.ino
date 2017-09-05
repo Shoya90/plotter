@@ -2,6 +2,7 @@
 #include <Bridge.h>
 #include <YunServer.h>
 #include <YunClient.h>
+#include <HttpClient.h>
 
 Servo myservo;
 
@@ -19,7 +20,9 @@ Servo myservo;
 #define RIGHT 2
 
 #define delay_time  5
+#define NUM 401
 int pos ;
+boolean servo_check;
 int steps;
 int chooser = 0;
 int top_cl = 0;
@@ -28,7 +31,10 @@ int origin = 0;
 int a = 0;
 YunServer server;
 String command;
-char buffer[10];
+char row[NUM] ;
+int len = 0;
+int numRows = 0;
+Process p;
 
 void setup() {
   myservo.attach(12);
@@ -54,42 +60,80 @@ void setup() {
   delay(1000);
   digitalWrite(13, LOW);
 
-  // Listen for incoming connection only from localhost
-  // (no one from the external network could connect)
   //server.listenOnLocalhost();
   server.begin();
+  servo_check = false;
+  myservo.write(35);
+  delay(1000);
 
+  p.runShellCommand("killall node");
+  p.runShellCommandAsynchronously("node /mnt/sda1/arduino/node/server.js");
 }
 
 void loop() {
 
-    YunClient client = server.accept();
-  
-    if (client) {
-      process(client);
-      client.stop();
+
+  //    YunClient client = server.accept();
+  //
+  //    if (client) {
+  //      process(client);
+  //      client.stop();
+  //    }
+
+  HttpClient client;
+
+  if (origin != 3) {
+    findOrigin();
+    if (origin == 3) {
+      for (int i = 0; i < 120; i++) {
+        moveLeft();
+      }
+      client.get("http://localhost:8080/ready");
+      Step_OFF();
     }
-
-
-//  if (Serial.available() > 0) {
-//    command = Serial.readString();
-//    command.toCharArray(buffer, 10);
-//    //int t_int = command.toInt();
-//    for (int x = 0; x < sizeof(buffer); x++) {
-//      //int t = bitRead(command.charAt(x), 7);
-//      //char t = command.charAt(x);
-//      
-//      Serial.println(bitRead(buffer[x], 7));
-//    }
-//  }
-//
-//
-//  delay(1000);
-
-
-    if(origin != 3){
-      findOrigin();
+  }
+  else {
+    if (p.available() > 0 && len < NUM) {
+      char buffer = p.read();
+      Serial.print(buffer);
+      row[len] = buffer;
+      len++;
+    } else {
+      if (len > 0) {        
+        int i = 0;
+        while (i < len) {
+          if (row[i] == '1') {
+            Step_OFF();
+            penDown();
+            delay(1000);
+          } else {
+            Step_OFF();
+            penUp();
+            delay(1000);
+          }
+          for (int j = i + 1; j < len && row[i] == row[j]; j++) {
+            if (numRows % 2 == 0) {
+              moveLeft();
+            } else {
+              moveRight();
+            }
+            i++;
+          }
+          i++;
+        }
+        len = 0;
+        numRows++;
+        Serial.println(numRows);
+        moveDown();
+        client.get("http://localhost:8080/end");
+      }
     }
+  }
+
+
+
+
+
 
 }
 
@@ -118,7 +162,7 @@ void findOrigin() {
   if (right_cl == HIGH && top_cl == LOW) {
     Step_OFF();
     delay(delay_time);
-    for (int i = 0; i < 20; i++) {
+    for (int i = 0; i < 40; i++) {
       moveLeft();
     }
     origin = 2;
@@ -131,7 +175,7 @@ void findOrigin() {
 
   if (right_cl == LOW && top_cl == HIGH) {
     Step_OFF();
-    for (int i = 0; i < 20; i++) {
+    for (int i = 0; i < 100; i++) {
       moveDown();
     }
     origin = 3;
@@ -179,15 +223,15 @@ void moveRight() {
 }
 
 //SERVO CONTROL-------------------------------------------------
-void penUp() {
-  for (pos = 90; pos <= 180; pos += 1) // goes from 90 degrees to 180 degrees
+void penDown() {
+  for (pos = 35; pos <= 90; pos +=5) // goes from 90 degrees to 180 degrees
   { // in steps of 1 degree
     myservo.write(pos);              // tell servo to go to position in variable 'pos'
     delay(15);                       // waits 15ms for the servo to reach the position
   }
 }
-void penDown() {
-  for (pos = 180; pos >= 90; pos -= 1) // goes from 180 degrees to 90 degrees
+void penUp() {
+  for (pos = 90; pos >= 35; pos -=5) // goes from 180 degrees to 90 degrees
   {
     myservo.write(pos);              // tell servo to go to position in variable 'pos'
     delay(15);                       // waits 15ms for the servo to reach the position
