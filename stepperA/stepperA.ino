@@ -71,6 +71,7 @@ void setup() {
 }
 
 void loop() {
+  // main loop
   HttpClient client;
 
   if (origin != 3) {
