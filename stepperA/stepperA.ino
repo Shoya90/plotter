@@ -60,7 +60,6 @@ void setup() {
   delay(1000);
   digitalWrite(13, LOW);
 
-  //server.listenOnLocalhost();
   server.begin();
   servo_check = false;
   myservo.write(35);
@@ -232,18 +231,6 @@ void penUp() {
 
 
 //MOVE -----------------------------------------------------
-
-//  void Bezier(p1,p2){
-//    C = p1 + .39*abs(p2-p1)*n1
-//    D = p1 - .39*abs(p2-p1)*n2
-//
-//    for(t=0 ; t < 1 ; t+=.01){
-//      px = p1*pow(1-t,3) + 3*C*t*pow(1-t,2) + 3*D*pow(t,2)*(1-t) + p2*pow(t,3);
-//      py =
-//    }
-//
-//  }
-
 void moveTo(int x, int y) {
 
   int b[2];
