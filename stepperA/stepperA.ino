@@ -71,15 +71,6 @@ void setup() {
 }
 
 void loop() {
-
-
-  //    YunClient client = server.accept();
-  //
-  //    if (client) {
-  //      process(client);
-  //      client.stop();
-  //    }
-
   HttpClient client;
 
   if (origin != 3) {
