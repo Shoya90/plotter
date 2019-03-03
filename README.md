@@ -1,2 +1,2 @@
 # plotter
-vertical plotter 
+vertical plotter with Arduino Yun
