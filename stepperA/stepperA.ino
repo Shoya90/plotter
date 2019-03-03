@@ -120,12 +120,6 @@ void loop() {
       }
     }
   }
-
-
-
-
-
-
 }
 
 void process(YunClient client) {
